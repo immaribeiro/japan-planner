@@ -474,3 +474,210 @@ async def add_expense(request: Request, description: str = Form(...), amount: fl
     session.add(expense)
     session.commit()
     return RedirectResponse(url="/budget", status_code=status.HTTP_302_FOUND)
+
+
+# ==================== USER MANAGEMENT ====================
+
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request, current_user: User = Depends(get_current_user)):
+    return templates.TemplateResponse("profile.html", {
+        "request": request,
+        "user": current_user
+    })
+
+@app.post("/profile/password", response_class=HTMLResponse)
+async def change_password(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    # Verify current password
+    if not verify_password(current_password, current_user.password_hash):
+        return templates.TemplateResponse("profile.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Current password is incorrect"
+        })
+    
+    # Check passwords match
+    if new_password != confirm_password:
+        return templates.TemplateResponse("profile.html", {
+            "request": request,
+            "user": current_user,
+            "error": "New passwords do not match"
+        })
+    
+    # Update password
+    current_user.password_hash = get_password_hash(new_password)
+    session.add(current_user)
+    session.commit()
+    
+    return templates.TemplateResponse("profile.html", {
+        "request": request,
+        "user": current_user,
+        "success": "Password updated successfully!"
+    })
+
+
+# ==================== ADMIN USER MANAGEMENT ====================
+
+@app.get("/users", response_class=HTMLResponse)
+async def users_page(request: Request, current_user: User = Depends(get_current_admin_user), session: Session = Depends(get_session)):
+    users = session.exec(select(User).order_by(User.created_at)).all()
+    return templates.TemplateResponse("users.html", {
+        "request": request,
+        "user": current_user,
+        "users": users
+    })
+
+@app.post("/users", response_class=HTMLResponse)
+async def create_user(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    is_admin: str = Form(None),
+    current_user: User = Depends(get_current_admin_user),
+    session: Session = Depends(get_session)
+):
+    # Check if username exists
+    existing = session.exec(select(User).where(User.username == username)).first()
+    if existing:
+        users = session.exec(select(User).order_by(User.created_at)).all()
+        return templates.TemplateResponse("users.html", {
+            "request": request,
+            "user": current_user,
+            "users": users,
+            "error": f"Username '{username}' already exists"
+        })
+    
+    # Create new user
+    new_user = User(
+        username=username,
+        password_hash=get_password_hash(password),
+        is_admin=(is_admin == "true")
+    )
+    session.add(new_user)
+    session.commit()
+    
+    return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)
+
+@app.get("/users/{user_id}", response_class=HTMLResponse)
+async def edit_user_page(
+    request: Request,
+    user_id: int,
+    current_user: User = Depends(get_current_admin_user),
+    session: Session = Depends(get_session)
+):
+    edit_user = session.get(User, user_id)
+    if not edit_user:
+        return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)
+    
+    return templates.TemplateResponse("user_edit.html", {
+        "request": request,
+        "user": current_user,
+        "edit_user": edit_user
+    })
+
+@app.post("/users/{user_id}", response_class=HTMLResponse)
+async def update_user(
+    request: Request,
+    user_id: int,
+    username: str = Form(...),
+    is_admin: str = Form(None),
+    current_user: User = Depends(get_current_admin_user),
+    session: Session = Depends(get_session)
+):
+    edit_user = session.get(User, user_id)
+    if not edit_user:
+        return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)
+    
+    # Check if new username conflicts with existing user
+    if username != edit_user.username:
+        existing = session.exec(select(User).where(User.username == username)).first()
+        if existing:
+            return templates.TemplateResponse("user_edit.html", {
+                "request": request,
+                "user": current_user,
+                "edit_user": edit_user,
+                "error": f"Username '{username}' already exists"
+            })
+    
+    # Update user
+    edit_user.username = username
+    edit_user.is_admin = (is_admin == "true")
+    session.add(edit_user)
+    session.commit()
+    
+    return templates.TemplateResponse("user_edit.html", {
+        "request": request,
+        "user": current_user,
+        "edit_user": edit_user,
+        "success": "User updated successfully!"
+    })
+
+@app.post("/users/{user_id}/password", response_class=HTMLResponse)
+async def reset_user_password(
+    request: Request,
+    user_id: int,
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    current_user: User = Depends(get_current_admin_user),
+    session: Session = Depends(get_session)
+):
+    edit_user = session.get(User, user_id)
+    if not edit_user:
+        return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)
+    
+    # Check passwords match
+    if new_password != confirm_password:
+        return templates.TemplateResponse("user_edit.html", {
+            "request": request,
+            "user": current_user,
+            "edit_user": edit_user,
+            "error": "Passwords do not match"
+        })
+    
+    # Update password
+    edit_user.password_hash = get_password_hash(new_password)
+    session.add(edit_user)
+    session.commit()
+    
+    return templates.TemplateResponse("user_edit.html", {
+        "request": request,
+        "user": current_user,
+        "edit_user": edit_user,
+        "success": "Password reset successfully!"
+    })
+
+@app.post("/users/{user_id}/delete")
+async def delete_user(
+    user_id: int,
+    current_user: User = Depends(get_current_admin_user),
+    session: Session = Depends(get_session)
+):
+    edit_user = session.get(User, user_id)
+    if not edit_user:
+        return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)
+    
+    # Prevent self-deletion
+    if edit_user.id == current_user.id:
+        return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)
+    
+    # Delete user's sessions first
+    user_sessions = session.exec(select(SessionData).where(SessionData.user_id == user_id)).all()
+    for s in user_sessions:
+        session.delete(s)
+    
+    # Delete user's expenses
+    user_expenses = session.exec(select(Expense).where(Expense.user_id == user_id)).all()
+    for e in user_expenses:
+        session.delete(e)
+    
+    # Delete user
+    session.delete(edit_user)
+    session.commit()
+    
+    return RedirectResponse(url="/users", status_code=status.HTTP_302_FOUND)

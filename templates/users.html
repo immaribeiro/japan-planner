@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">👥 User Management</h1>
+        <a href="/" class="text-blue-400 hover:text-blue-300">← Back to Dashboard</a>
+    </div>
+    
+    {% if success %}
+    <div class="bg-green-900/50 border border-green-700 text-green-300 px-4 py-3 rounded mb-6">
+        {{ success }}
+    </div>
+    {% endif %}
+    
+    {% if error %}
+    <div class="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded mb-6">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    <!-- Users Table -->
+    <div class="bg-gray-800 rounded-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-300">Username</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-300">Role</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-300">Created</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-300">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% for u in users %}
+                <tr class="hover:bg-gray-750">
+                    <td class="px-6 py-4">
+                        <span class="font-medium">{{ u.username }}</span>
+                        {% if u.id == user.id %}
+                        <span class="text-gray-500 text-sm">(you)</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if u.is_admin %}
+                        <span class="bg-purple-600 text-white text-xs px-2 py-1 rounded">Admin</span>
+                        {% else %}
+                        <span class="bg-gray-600 text-white text-xs px-2 py-1 rounded">User</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-400 text-sm">
+                        {{ u.created_at.strftime('%Y-%m-%d') }}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="/users/{{ u.id }}" 
+                           class="text-blue-400 hover:text-blue-300 text-sm mr-3">Edit</a>
+                        {% if u.id != user.id %}
+                        <form action="/users/{{ u.id }}/delete" method="POST" class="inline"
+                              onsubmit="return confirm('Are you sure you want to delete {{ u.username }}?')">
+                            <button type="submit" class="text-red-400 hover:text-red-300 text-sm">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Add New User -->
+    <div class="bg-gray-800 rounded-lg p-6 mt-6">
+        <h2 class="text-xl font-semibold mb-4">➕ Add New User</h2>
+        <form action="/users" method="POST" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300 mb-1">
+                        Username
+                    </label>
+                    <input type="text" id="username" name="username" required
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-1">
+                        Password
+                    </label>
+                    <input type="password" id="password" name="password" required minlength="4"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="is_admin" name="is_admin" value="true"
+                    class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                <label for="is_admin" class="ml-2 text-sm font-medium text-gray-300">
+                    Make this user an admin
+                </label>
+            </div>
+            <button type="submit" 
+                class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition">
+                Create User
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

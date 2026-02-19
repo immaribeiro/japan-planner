@@ -22,7 +22,10 @@
             </a>
             <div class="flex items-center gap-4">
                 {% if user %}
-                <span class="text-gray-400 text-sm">{{ user.username }}</span>
+                {% if user.is_admin %}
+                <a href="/users" class="text-purple-400 hover:text-purple-300 text-sm">👥 Users</a>
+                {% endif %}
+                <a href="/profile" class="text-gray-400 hover:text-white text-sm">{{ user.username }}</a>
                 <form action="/logout" method="POST" class="inline">
                     <button type="submit" class="text-gray-400 hover:text-white text-sm">Logout</button>
                 </form>
