@@ -1,8 +1,8 @@
 from sqlmodel import create_engine, Session, SQLModel
-from .main import settings # Import settings from main
+from config import settings
 
 # Create the database engine
-engine = create_engine(settings.DATABASE_URL, echo=True)
+engine = create_engine(settings.DATABASE_URL, echo=False)
 
 def create_db_and_tables():
     """
