@@ -1,51 +1,93 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Dashboard</h1>
-<p class="text-lg text-center text-gray-700 dark:text-gray-300 mb-8">Welcome, {{ user.username }}!</p>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Trip Overview Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Trip Overview</h2>
-        <p><strong>Dates:</strong> May 7 - May 28, 2026 (22 Days)</p>
-        <p><strong>Destination:</strong> Japan</p>
-        <button class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Full Itinerary</button>
+<div class="space-y-6">
+    <!-- Trip Header -->
+    <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+        <h1 class="text-3xl font-bold text-white mb-2">🇯🇵 Japan Trip 2026</h1>
+        <p class="text-gray-400">May 7 - May 28, 2026 • 22 days</p>
+        <div class="mt-4 flex gap-4 text-sm">
+            <span class="bg-blue-600 px-3 py-1 rounded-full text-white">{{ cities|length }} cities</span>
+            <span class="bg-green-600 px-3 py-1 rounded-full text-white">{{ days_until }} days to go</span>
+        </div>
     </div>
 
-    <!-- Interactive Map Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Interactive Map</h2>
-        <p>See your journey unfold on the map with city pins.</p>
-        <button class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Open Map</button>
+    <!-- Quick Navigation -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="/itinerary" class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-center transition">
+            <div class="text-3xl mb-2">📅</div>
+            <div class="text-white font-semibold">Itinerary</div>
+        </a>
+        <a href="/cities" class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-center transition">
+            <div class="text-3xl mb-2">🏙️</div>
+            <div class="text-white font-semibold">Cities</div>
+        </a>
+        <a href="/accommodations" class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-center transition">
+            <div class="text-3xl mb-2">🏨</div>
+            <div class="text-white font-semibold">Hotels</div>
+        </a>
+        <a href="/budget" class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-center transition">
+            <div class="text-3xl mb-2">💰</div>
+            <div class="text-white font-semibold">Budget</div>
+        </a>
     </div>
 
-    <!-- Upcoming Activities Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Upcoming Activities</h2>
-        <p>No upcoming activities planned.</p>
-        <button class="mt-4 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Add Activity</button>
+    <!-- Map -->
+    <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+        <h2 class="text-xl font-bold text-white mb-4">🗺️ Route Map</h2>
+        <div id="map" class="h-96 rounded-lg"></div>
     </div>
 
-    <!-- Accommodations Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Accommodations</h2>
-        <p>View your booked hotels and stays.</p>
-        <button class="mt-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Manage Accommodations</button>
-    </div>
-
-    <!-- Flights/Transport Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Flights & Transport</h2>
-        <p>Check flight details and other transport arrangements.</p>
-        <button class="mt-4 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">View Transport</button>
-    </div>
-
-    <!-- Budget Tracker Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Budget Tracker</h2>
-        <p>Keep track of your expenses and split costs.</p>
-        <button class="mt-4 bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Manage Budget</button>
+    <!-- Cities List -->
+    <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+        <h2 class="text-xl font-bold text-white mb-4">Cities to Visit</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for city in cities %}
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-white">{{ city.name }}</h3>
+                <p class="text-gray-400 text-sm">{{ city.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // Initialize map centered on Japan
+    var map = L.map('map').setView([36.2048, 138.2529], 6);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Add city markers
+    var cities = [
+        {% for city in cities %}
+        {name: "{{ city.name }}", lat: {{ city.lat }}, lon: {{ city.lon }}, desc: "{{ city.description }}"},
+        {% endfor %}
+    ];
+
+    var markers = [];
+    cities.forEach(function(city) {
+        var marker = L.marker([city.lat, city.lon]).addTo(map)
+            .bindPopup('<b>' + city.name + '</b><br>' + city.desc);
+        markers.push([city.lat, city.lon]);
+    });
+
+    // Draw route line
+    if (markers.length > 1) {
+        var polyline = L.polyline(markers, {color: '#3b82f6', weight: 3, opacity: 0.7}).addTo(map);
+    }
+
+    // Fit map to show all markers
+    if (markers.length > 0) {
+        map.fitBounds(markers, {padding: [50, 50]});
+    }
+</script>
 {% endblock %}

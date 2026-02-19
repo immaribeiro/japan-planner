@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-white">💰 Budget</h1>
+        <button onclick="document.getElementById('addExpenseModal').classList.remove('hidden')" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+            + Add Expense
+        </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-gray-800 rounded-lg p-4">
+            <div class="text-gray-400 text-sm">Total Expenses</div>
+            <div class="text-2xl font-bold text-white">¥{{ total_expenses|default(0) }}</div>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4">
+            <div class="text-gray-400 text-sm">Your Share</div>
+            <div class="text-2xl font-bold text-green-400">¥{{ user_share|default(0) }}</div>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4">
+            <div class="text-gray-400 text-sm">Per Day Average</div>
+            <div class="text-2xl font-bold text-blue-400">¥{{ per_day|default(0) }}</div>
+        </div>
+    </div>
+
+    <!-- Expenses List -->
+    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th class="text-left text-gray-300 px-4 py-3">Date</th>
+                    <th class="text-left text-gray-300 px-4 py-3">Description</th>
+                    <th class="text-left text-gray-300 px-4 py-3">Category</th>
+                    <th class="text-right text-gray-300 px-4 py-3">Amount</th>
+                    <th class="text-left text-gray-300 px-4 py-3">Split</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                <tr class="border-t border-gray-700 hover:bg-gray-750">
+                    <td class="px-4 py-3 text-gray-400">{{ expense.date }}</td>
+                    <td class="px-4 py-3 text-white">{{ expense.description }}</td>
+                    <td class="px-4 py-3">
+                        <span class="bg-gray-600 px-2 py-1 rounded text-xs text-gray-300">{{ expense.category or 'Other' }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-right text-white font-mono">¥{{ expense.amount }}</td>
+                    <td class="px-4 py-3 text-gray-400">{{ expense.split_with or 'Solo' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">No expenses yet. Add your first expense!</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Expense Modal -->
+<div id="addExpenseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold text-white mb-4">Add Expense</h2>
+        <form action="/budget" method="POST">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-300 text-sm mb-1">Description</label>
+                    <input type="text" name="description" required class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-1">Amount (¥)</label>
+                        <input type="number" step="0.01" name="amount" required class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-1">Date</label>
+                        <input type="date" name="date" required class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-300 text-sm mb-1">Category</label>
+                    <select name="category" class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Accommodation">Accommodation</option>
+                        <option value="Activities">Activities</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-300 text-sm mb-1">Split with</label>
+                    <input type="text" name="split_with" placeholder="e.g., pedro.rodrigues" class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                </div>
+            </div>
+            <div class="mt-6 flex gap-3 justify-end">
+                <button type="button" onclick="document.getElementById('addExpenseModal').classList.add('hidden')" 
+                        class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded transition">Cancel</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -68,12 +68,6 @@ def on_startup():
                 print(f"Created city: {city.name}")
 
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request, current_user: Optional[User] = Depends(get_current_user_optional)):
-    if current_user:
-        return templates.TemplateResponse("dashboard.html", {"request": request, "user": current_user})
-    return RedirectResponse(url="/login")
-
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -128,8 +122,94 @@ async def read_me(current_user: User = Depends(get_current_user)):
 async def admin_page(request: Request, current_user: User = Depends(get_current_admin_user)):
     return templates.TemplateResponse("admin.html", {"request": request, "user": current_user})
 
-# TODO: Add API endpoints for CRUD operations for all models.
-# TODO: Implement frontend pages: dashboard, interactive map, day-by-day itinerary,
-#       per-city detail, accommodations, flights/transport, budget tracker.
-# TODO: Integrate Tailwind CSS and htmx.
-# TODO: Integrate Leaflet.js for the map.
+# ==================== PAGES ====================
+
+from datetime import date, timedelta
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard(request: Request, current_user: Optional[User] = Depends(get_current_user_optional), session: Session = Depends(get_session)):
+    if not current_user:
+        return RedirectResponse(url="/login")
+    
+    cities = session.exec(select(City).order_by(City.order)).all()
+    trip_start = date(2026, 5, 7)
+    days_until = (trip_start - date.today()).days
+    
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request, 
+        "user": current_user,
+        "cities": cities,
+        "days_until": days_until
+    })
+
+@app.get("/cities", response_class=HTMLResponse)
+async def cities_page(request: Request, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    cities = session.exec(select(City).order_by(City.order)).all()
+    return templates.TemplateResponse("cities.html", {"request": request, "user": current_user, "cities": cities})
+
+@app.post("/cities")
+async def add_city(request: Request, name: str = Form(...), description: str = Form(""), lat: float = Form(...), lon: float = Form(...), current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    city = City(name=name, description=description, lat=lat, lon=lon, country="Japan", order=99)
+    session.add(city)
+    session.commit()
+    return RedirectResponse(url="/cities", status_code=status.HTTP_302_FOUND)
+
+@app.get("/itinerary", response_class=HTMLResponse)
+async def itinerary_page(request: Request, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    trip_start = date(2026, 5, 7)
+    trip_end = date(2026, 5, 28)
+    
+    days = []
+    current_date = trip_start
+    weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    
+    while current_date <= trip_end:
+        days.append({
+            'date': current_date.isoformat(),
+            'day': current_date.day,
+            'weekday': weekdays[current_date.weekday()],
+            'city': None,
+            'title': None,
+            'activities': []
+        })
+        current_date += timedelta(days=1)
+    
+    return templates.TemplateResponse("itinerary.html", {"request": request, "user": current_user, "days": days})
+
+@app.get("/accommodations", response_class=HTMLResponse)
+async def accommodations_page(request: Request, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    accommodations = session.exec(select(Accommodation)).all()
+    cities = session.exec(select(City).order_by(City.order)).all()
+    return templates.TemplateResponse("accommodations.html", {
+        "request": request, 
+        "user": current_user, 
+        "accommodations": accommodations,
+        "cities": cities
+    })
+
+@app.post("/accommodations")
+async def add_accommodation(request: Request, name: str = Form(...), address: str = Form(...), city_id: int = Form(...), check_in: date = Form(...), check_out: date = Form(...), cost: float = Form(None), booking_url: str = Form(None), current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    acc = Accommodation(name=name, address=address, city_id=city_id, check_in=check_in, check_out=check_out, cost=cost, booking_url=booking_url)
+    session.add(acc)
+    session.commit()
+    return RedirectResponse(url="/accommodations", status_code=status.HTTP_302_FOUND)
+
+@app.get("/budget", response_class=HTMLResponse)
+async def budget_page(request: Request, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    expenses = session.exec(select(Expense).where(Expense.user_id == current_user.id)).all()
+    total = sum(e.amount for e in expenses)
+    return templates.TemplateResponse("budget.html", {
+        "request": request, 
+        "user": current_user, 
+        "expenses": expenses,
+        "total_expenses": total,
+        "user_share": total,
+        "per_day": round(total / 22, 2) if total > 0 else 0
+    })
+
+@app.post("/budget")
+async def add_expense(request: Request, description: str = Form(...), amount: float = Form(...), date: date = Form(...), category: str = Form("Other"), split_with: str = Form(None), current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    expense = Expense(user_id=current_user.id, description=description, amount=amount, date=date, category=category, split_with=split_with)
+    session.add(expense)
+    session.commit()
+    return RedirectResponse(url="/budget", status_code=status.HTTP_302_FOUND)

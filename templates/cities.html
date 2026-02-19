@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-white">🏙️ Cities</h1>
+        {% if user.is_admin %}
+        <button onclick="document.getElementById('addCityModal').classList.remove('hidden')" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+            + Add City
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for city in cities %}
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+            <div class="h-32 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                <span class="text-5xl">🏯</span>
+            </div>
+            <div class="p-4">
+                <h3 class="text-xl font-bold text-white">{{ city.name }}</h3>
+                <p class="text-gray-400 text-sm mt-1">{{ city.description or 'No description' }}</p>
+                <div class="mt-4 flex gap-2">
+                    <a href="/cities/{{ city.id }}" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add City Modal -->
+<div id="addCityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold text-white mb-4">Add New City</h2>
+        <form action="/cities" method="POST">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-300 text-sm mb-1">City Name</label>
+                    <input type="text" name="name" required class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-gray-300 text-sm mb-1">Description</label>
+                    <textarea name="description" class="w-full bg-gray-700 text-white rounded px-3 py-2" rows="2"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-1">Latitude</label>
+                        <input type="number" step="any" name="lat" required class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-1">Longitude</label>
+                        <input type="number" step="any" name="lon" required class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-3 justify-end">
+                <button type="button" onclick="document.getElementById('addCityModal').classList.add('hidden')" 
+                        class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded transition">Cancel</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Add City</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
