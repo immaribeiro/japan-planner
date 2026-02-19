@@ -57,6 +57,21 @@ async def invalidate_user_session(response: Response, request: Request, session:
             session.commit()
     response.delete_cookie(SESSION_COOKIE_NAME)
 
+async def get_current_user_optional(request: Request, session: Session = Depends(get_session)) -> Optional[User]:
+    """Returns the current user or None if not authenticated (no exception)."""
+    session_id = request.cookies.get(SESSION_COOKIE_NAME)
+    if not session_id:
+        return None
+
+    statement = select(SessionData).where(SessionData.session_id == session_id)
+    db_session_data = session.exec(statement).first()
+
+    if not db_session_data or db_session_data.expires_at < datetime.utcnow():
+        return None
+
+    user = session.get(User, db_session_data.user_id)
+    return user
+
 async def get_current_user(request: Request, session: Session = Depends(get_session)) -> User:
     session_id = request.cookies.get(SESSION_COOKIE_NAME)
     if not session_id:

@@ -15,7 +15,7 @@ from models import User, SessionData, City, ItineraryDay, Activity, Accommodatio
 from auth import (
     get_password_hash, verify_password,
     UserLogin, create_user_session, invalidate_user_session,
-    get_current_user, get_current_admin_user,
+    get_current_user, get_current_user_optional, get_current_admin_user,
     SESSION_COOKIE_NAME
 )
 from config import settings
@@ -69,7 +69,7 @@ def on_startup():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request, current_user: Optional[User] = Depends(get_current_user)):
+async def read_root(request: Request, current_user: Optional[User] = Depends(get_current_user_optional)):
     if current_user:
         return templates.TemplateResponse("dashboard.html", {"request": request, "user": current_user})
     return RedirectResponse(url="/login")
