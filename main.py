@@ -79,7 +79,7 @@ async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login", response_class=HTMLResponse)
-async def login(request: Request, response: Response, username: str = Form(...), password: str = Form(...), session: Session = Depends(get_session)):
+async def login(request: Request, username: str = Form(...), password: str = Form(...), session: Session = Depends(get_session)):
     user_data = UserLogin(username=username, password=password)
     user = session.exec(select(User).where(User.username == user_data.username)).first()
 
@@ -90,8 +90,9 @@ async def login(request: Request, response: Response, username: str = Form(...),
             status_code=status.HTTP_401_UNAUTHORIZED
         )
 
-    await create_user_session(response, user.id, session)
-    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    redirect_response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    await create_user_session(redirect_response, user.id, session)
+    return redirect_response
 
 @app.post("/logout")
 async def logout(request: Request, response: Response, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):

@@ -42,8 +42,8 @@ async def create_user_session(response: Response, user_id: int, session: Session
         value=session_id,
         httponly=True,
         samesite="lax",
-        secure=settings.ROOT_PATH.startswith("https"), # Set secure if served over HTTPS
-        expires=expires_at.timestamp()
+        secure=True,  # Always secure in production (behind HTTPS proxy)
+        expires=int(expires_at.timestamp())
     )
     return session_id
 
