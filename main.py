@@ -38,7 +38,7 @@ def on_startup():
         # Create admin user 'imma' if not exists
         admin_user = session.exec(select(User).where(User.username == "imma")).first()
         if not admin_user:
-            hashed_password = get_password_hash("adminpass") # Use a strong password
+            hashed_password = get_password_hash("admin") # Use a strong password
             imma_user = User(username="imma", password_hash=hashed_password, is_admin=True)
             crud.create_object(session, imma_user)
             print("Created admin user: imma")
@@ -46,7 +46,7 @@ def on_startup():
         # Create regular user 'pedro.rodrigues' if not exists
         pedro_user = session.exec(select(User).where(User.username == "pedro.rodrigues")).first()
         if not pedro_user:
-            hashed_password = get_password_hash("pedropass") # Use a strong password
+            hashed_password = get_password_hash("pedro") # Use a strong password
             pedro_rodrigues = User(username="pedro.rodrigues", password_hash=hashed_password, is_admin=False)
             crud.create_object(session, pedro_rodrigues)
             print("Created user: pedro.rodrigues")
