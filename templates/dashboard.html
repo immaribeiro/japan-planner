@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Dashboard</h1>
+<p class="text-lg text-center text-gray-700 dark:text-gray-300 mb-8">Welcome, {{ user.username }}!</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Trip Overview Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Trip Overview</h2>
+        <p><strong>Dates:</strong> May 7 - May 28, 2026 (22 Days)</p>
+        <p><strong>Destination:</strong> Japan</p>
+        <button class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Full Itinerary</button>
+    </div>
+
+    <!-- Interactive Map Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Interactive Map</h2>
+        <p>See your journey unfold on the map with city pins.</p>
+        <button class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Open Map</button>
+    </div>
+
+    <!-- Upcoming Activities Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Upcoming Activities</h2>
+        <p>No upcoming activities planned.</p>
+        <button class="mt-4 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Add Activity</button>
+    </div>
+
+    <!-- Accommodations Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Accommodations</h2>
+        <p>View your booked hotels and stays.</p>
+        <button class="mt-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Manage Accommodations</button>
+    </div>
+
+    <!-- Flights/Transport Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Flights & Transport</h2>
+        <p>Check flight details and other transport arrangements.</p>
+        <button class="mt-4 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">View Transport</button>
+    </div>
+
+    <!-- Budget Tracker Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Budget Tracker</h2>
+        <p>Keep track of your expenses and split costs.</p>
+        <button class="mt-4 bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Manage Budget</button>
+    </div>
+</div>
+{% endblock %}

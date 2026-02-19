@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Admin Dashboard</h1>
+<p class="text-lg text-center text-gray-700 dark:text-gray-300 mb-8">Welcome, Admin {{ user.username }}! Here you can manage users and other global settings.</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- User Management Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">User Management</h2>
+        <p>View, create, edit, or delete user accounts.</p>
+        <button class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Manage Users</button>
+    </div>
+
+    <!-- City Management Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">City Management</h2>
+        <p>Add, edit, or remove cities available for itineraries.</p>
+        <button class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Manage Cities</button>
+    </div>
+
+    <!-- System Settings Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">System Settings</h2>
+        <p>Configure application-wide settings.</p>
+        <button class="mt-4 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Configure Settings</button>
+    </div>
+</div>
+{% endblock %}

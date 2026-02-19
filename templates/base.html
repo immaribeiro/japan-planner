@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japan Planner</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- htmx CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQGqfdmUMK+5AWtSokfhaFuL2wWciQFIc4sxYtHMGygLMs1AMopcQvrTfa" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Dark mode styles (Tailwind will handle much of this, but adding a base) */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a202c; /* Dark background */
+                color: #e2e8f0; /* Light text */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
+    <nav class="bg-white dark:bg-gray-800 shadow-md p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-blue-600 dark:text-blue-400">Japan Planner</a>
+            <div>
+                {% if user %}
+                    <span class="mr-4">Welcome, {{ user.username }}!</span>
+                    {% if user.is_admin %}<span class="text-red-500">(Admin)</span>{% endif %}
+                    <form hx-post="/logout" hx-trigger="click" hx-swap="outerHTML" class="inline">
+                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="/login" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Login</a>
+                    <a href="/register" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-white dark:bg-gray-800 shadow-md mt-auto p-4 text-center text-gray-600 dark:text-gray-400">
+        &copy; 2026 Japan Planner. All rights reserved.
+    </footer>
+</body>
+</html>

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: japan-planner-deployment
+  labels:
+    app: japan-planner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: japan-planner
+  template:
+    metadata:
+      labels:
+        app: japan-planner
+    spec:
+      containers:
+      - name: japan-planner
+        image: japan-planner:latest # This image needs to be built and pushed to a registry
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: japan-planner-service
+spec:
+  selector:
+    app: japan-planner
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer # Or NodePort/ClusterIP depending on needs
