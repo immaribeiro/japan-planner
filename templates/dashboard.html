@@ -76,15 +76,52 @@
         <div id="map" class="h-96 rounded-lg"></div>
     </div>
 
+    <!-- AI Trip Advisor -->
+    <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-white">🤖 AI Trip Advisor</h2>
+            <button onclick="getAIAnalysis()" id="analyzeBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
+                <span id="analyzeBtnText">✨ Analyze Trip</span>
+            </button>
+        </div>
+        <div id="aiAnalysis" class="prose prose-invert max-w-none">
+            <p class="text-gray-400">Click "Analyze Trip" to get AI suggestions on your itinerary, route optimization, must-see attractions, and budget tips.</p>
+        </div>
+    </div>
+
+    <script>
+        async function getAIAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            const btnText = document.getElementById('analyzeBtnText');
+            const analysisDiv = document.getElementById('aiAnalysis');
+            
+            btn.disabled = true;
+            btnText.textContent = '⏳ Analyzing...';
+            analysisDiv.innerHTML = '<p class="text-gray-400">Analyzing your trip plan...</p>';
+            
+            try {
+                const response = await fetch('/api/ai-analysis');
+                const data = await response.json();
+                analysisDiv.innerHTML = '<div class="text-gray-200 whitespace-pre-wrap">' + data.analysis + '</div>';
+            } catch (error) {
+                analysisDiv.innerHTML = '<p class="text-red-400">Error getting analysis. Please try again.</p>';
+            }
+            
+            btn.disabled = false;
+            btnText.textContent = '✨ Analyze Trip';
+        }
+    </script>
+
     <!-- Cities List -->
     <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
         <h2 class="text-xl font-bold text-white mb-4">Cities to Visit</h2>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for city in cities %}
-            <div class="bg-gray-700 rounded-lg p-4">
+            <a href="/cities/{{ city.id }}" class="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition block">
                 <h3 class="text-lg font-semibold text-white">{{ city.name }}</h3>
                 <p class="text-gray-400 text-sm">{{ city.description }}</p>
-            </div>
+                <span class="text-blue-400 text-sm mt-2 inline-block">View details →</span>
+            </a>
             {% endfor %}
         </div>
     </div>
