@@ -12,6 +12,44 @@
         </div>
     </div>
 
+    <!-- Currency Converter -->
+    <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+        <h2 class="text-lg font-bold text-white mb-3">💱 Currency Converter</h2>
+        <div class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[140px]">
+                <label class="block text-gray-400 text-xs mb-1">EUR</label>
+                <input type="number" id="eurInput" step="0.01" placeholder="0.00" 
+                       class="w-full bg-gray-700 text-white rounded px-3 py-2 text-lg font-mono"
+                       oninput="convertFromEur()">
+            </div>
+            <div class="text-2xl text-gray-500">⇄</div>
+            <div class="flex-1 min-w-[140px]">
+                <label class="block text-gray-400 text-xs mb-1">JPY</label>
+                <input type="number" id="jpyInput" step="1" placeholder="0" 
+                       class="w-full bg-gray-700 text-white rounded px-3 py-2 text-lg font-mono"
+                       oninput="convertFromJpy()">
+            </div>
+            <div class="text-xs text-gray-500">
+                Rate: <span id="rateDisplay">~160</span> ¥/€
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const RATE = 160; // Approximate EUR to JPY rate
+        document.getElementById('rateDisplay').textContent = RATE;
+        
+        function convertFromEur() {
+            const eur = parseFloat(document.getElementById('eurInput').value) || 0;
+            document.getElementById('jpyInput').value = Math.round(eur * RATE);
+        }
+        
+        function convertFromJpy() {
+            const jpy = parseFloat(document.getElementById('jpyInput').value) || 0;
+            document.getElementById('eurInput').value = (jpy / RATE).toFixed(2);
+        }
+    </script>
+
     <!-- Quick Navigation -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <a href="/itinerary" class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-center transition">
